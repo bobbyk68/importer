@@ -40,7 +40,7 @@ class JsonReferenceDataWriterTest {
         assertThat(json).contains("\"ACA\"");
         assertThat(json).contains("\"AES\"");
         assertThat(json).contains("\"startDate\" : \"2001-01-01T00:00:00\"");
-        assertThat(json).contains("\"endDate\" : null\"");
+        assertThat(json).contains("\"endDate\" : null");
         assertThat(json).contains("\"description\" : \"Specification of the documentary requirements\"");
         assertThat(json).contains("\"description\" : \"Textual Explanation\"");
 
