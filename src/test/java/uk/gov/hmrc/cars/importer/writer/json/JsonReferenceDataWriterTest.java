@@ -35,14 +35,14 @@ class JsonReferenceDataWriterTest {
 
         String json = Files.readString(outputPath);
 
-        assertThat(json).contains(""codeLists"");
-        assertThat(json).contains(""AdditionalInformationTypes"");
-        assertThat(json).contains(""ACA"");
-        assertThat(json).contains(""AES"");
-        assertThat(json).contains(""startDate" : "2001-01-01T00:00:00"");
-        assertThat(json).contains(""endDate" : null");
-        assertThat(json).contains(""description" : "Specification of the documentary requirements"");
-        assertThat(json).contains(""description" : "Textual Explanation"");
+        assertThat(json).contains("\"codeLists\"");
+        assertThat(json).contains("\"AdditionalInformationTypes\"");
+        assertThat(json).contains("\"ACA\"");
+        assertThat(json).contains("\"AES\"");
+        assertThat(json).contains("\"startDate\" : \"2001-01-01T00:00:00\"");
+        assertThat(json).contains("\"endDate\" : null\"");
+        assertThat(json).contains("\"description\" : \"Specification of the documentary requirements\"");
+        assertThat(json).contains("\"description\" : \"Textual Explanation\"");
 
         assertThat(json).doesNotContain("internalId");
         assertThat(json).doesNotContain("sourceSystem");

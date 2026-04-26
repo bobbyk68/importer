@@ -39,10 +39,10 @@ class YamlReferenceDataWriterTest {
         assertThat(yaml).contains("AdditionalInformationTypes:");
         assertThat(yaml).contains("ACA:");
         assertThat(yaml).contains("AES:");
-        assertThat(yaml).contains("startDate: "2001-01-01T00:00:00"");
+        assertThat(yaml).contains("startDate: 2001-01-01T00:00:00");
         assertThat(yaml).contains("endDate: null");
-        assertThat(yaml).contains("description: "Specification of the documentary requirements"");
-        assertThat(yaml).contains("description: "Textual Explanation"");
+        assertThat(yaml).contains("description: \"Specification of the documentary requirements\"");
+        assertThat(yaml).contains("description: \"Textual Explanation\"");
 
         assertThat(yaml).doesNotContain("internalId");
         assertThat(yaml).doesNotContain("sourceSystem");
