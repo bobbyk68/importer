@@ -11,76 +11,25 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 public class WriterRegistry<T> {
 
-    private final Map<String, DataWriter<T>> dataWriters = new LinkedHashMap<>();
-    private final Map<String, FileDataWriter<T>> fileWriters = new LinkedHashMap<>();
+    private final Map<String, T> writers = new LinkedHashMap<>();
 
-    public void registerDataWriter(String key, DataWriter<T> writer) {
-        dataWriters.put(key, writer);
+    public void register(String key, T writer) {
+        writers.put(key, writer);
     }
 
-    public void registerFileWriter(String key, FileDataWriter<T> writer) {
-        fileWriters.put(key, writer);
-    }
-
-    public DataWriter<T> getDataWriter(String key) {
-        DataWriter<T> writer = dataWriters.get(key);
+    public T get(String key, String type) {
+        T writer = writers.get(key);
 
         if (writer == null) {
-            throw new IllegalArgumentException("Unknown data writer: " + key);
+            throw new IllegalArgumentException("Unknown " + type + ": " + key);
         }
 
         return writer;
     }
 
-    public FileDataWriter<T> getFileWriter(String key) {
-        FileDataWriter<T> writer = fileWriters.get(key);
-
-        if (writer == null) {
-            throw new IllegalArgumentException("Unknown file writer: " + key);
-        }
-
-        return writer;
+    public Set<String> supportedKeys() {
+        return writers.keySet();
     }
 }
-
-WriterRegistry<CodeLists> referenceDataRegistry = new WriterRegistry<>();
-
-referenceDataRegistry.registerFileWriter(
-        "yaml",
-                new ReferenceDataYamlWriter(yamlMapper, mapper)
-);
-
-        referenceDataRegistry.registerFileWriter(
-        "json",
-                new ReferenceDataJsonWriter(jsonMapper, mapper)
-);
-
-        referenceDataRegistry.registerDataWriter(
-        "db",
-                new ReferenceDataDbWriter(repository)
-);
-
-
-String writerType = args[0];
-
-if ("db".equals(writerType)) {
-        referenceDataRegistry
-        .getDataWriter(writerType)
-            .write(codeLists);
-} else {
-Path outputPath = Path.of(args[1]);
-
-    referenceDataRegistry
-            .getFileWriter(writerType)
-            .write(codeLists, outputPath);
-}
-
-WriterRegistry<Set<String>> disabledRulesRegistry = new WriterRegistry<>();
-
-disabledRulesRegistry.registerFileWriter(
-        "yaml",
-                new DisabledRulesYamlWriter(yamlMapper)
-);
