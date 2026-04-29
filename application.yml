@@ -1,0 +1,4 @@
+writer:
+  reference-data:
+    output-path: "target/reference-data.json"
+    json-enabled: true
