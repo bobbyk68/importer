@@ -18,24 +18,29 @@ mvn test
 ## Package structure
 
 ```text
-src/main/java
-└── uk/gov/hmrc/cars/importer
-    ├── model
-    │   ├── CodeList.java
-    │   ├── CodeLists.java
-    │   └── Value.java
-    └── writer
-        ├── ReferenceDataWriter.java
-        ├── json
-        │   └── JsonReferenceDataWriter.java
-        ├── mapper
-        │   └── CodeListsExportMapper.java
-        ├── model
-        │   ├── CodeListExport.java
-        │   ├── CodeListsExport.java
-        │   └── ValueExport.java
-        ├── support
-        │   └── ObjectMapperFactory.java
-        └── yaml
-            └── YamlReferenceDataWriter.java
+rule-collision-analyser
+├── pom.xml
+└── src
+    └── main
+        └── java
+            └── uk
+                └── gov
+                    └── hmrc
+                        └── rules
+                            └── analysis
+                                ├── RuleCollisionAnalyserApplication.java
+                                ├── cli
+                                │   └── CommandLineOptions.java
+                                └── dslr
+                                    ├── DslrFolderScanner.java
+                                    ├── DslrRuleExtractor.java
+                                    └── ParsedDslrRule.java
 ```
+java -jar rule-collision-analyser-1.0.0.jar \
+--dslr-dir /path/to/your/dslr/folder
+
+java -jar target/rule-collision-analyser-1.0.0.jar \
+--dslr-dir src/main/resources/rules/br455
+
+java -jar target/rule-collision-analyser-1.0.0.jar \
+--dslr-dir src/main/resources/rules/br455
