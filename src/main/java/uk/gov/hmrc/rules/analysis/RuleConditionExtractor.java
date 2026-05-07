@@ -70,7 +70,7 @@ public class RuleConditionExtractor {
     private RuleCondition tryExtractEqualsCondition(String line) {
 
         Pattern pattern = Pattern.compile(
-                "- with (.+?) (?:code|value)?\\s+([A-Z0-9_]+)$"
+                "- with (.+?) equals \"([^\"]+)\""
         );
 
         Matcher matcher = pattern.matcher(line);
@@ -91,14 +91,15 @@ public class RuleConditionExtractor {
                 Set.of(value)
         );
     }
-
     private String normaliseFieldPath(String rawField) {
 
         return rawField
+                .replace("requested procedure code", "requestedProcedure.code")
+                .replace("previous document type code", "previousDocument.typeCode")
+                .replace("declaration type code", "declaration.typeCode")
+                .replace("procedure category", "procedureCategory")
                 .replace(" type code", ".typeCode")
-                .replace(" procedure category", "procedureCategory")
-                .replace(" declaration type", "declaration.typeCode")
-                .replace("previous document", "previousDocument")
+                .replace(" code", ".code")
                 .replace(' ', '.');
     }
 }

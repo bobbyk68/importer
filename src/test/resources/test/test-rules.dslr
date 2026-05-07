@@ -1,0 +1,36 @@
+package uk.gov.hmrc.rules.test
+
+rule "BR455-TEST-001"
+when
+    Declaration exists
+    - with requested procedure code equals "71"
+    - with declaration type code equals "A"
+    - with procedure category equals "H1"
+then
+    Raise validation error "BR455-TEST-001"
+end
+
+rule "BR455-TEST-002"
+when
+    Declaration exists
+    - with requested procedure code equals "71"
+then
+    Raise validation error "BR455-TEST-002"
+end
+
+rule "BR455-TEST-003"
+when
+    Goods item exists
+    - with previous document exists
+    - with previous document type code equals "N355"
+then
+    Raise validation error "BR455-TEST-003"
+end
+
+rule "BR455-TEST-004"
+when
+    Goods item exists
+    - with requested procedure code equals "40"
+then
+    Raise validation error "BR455-TEST-004"
+end
