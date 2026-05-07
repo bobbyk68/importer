@@ -1,3 +1,5 @@
+package uk.gov.hmrc.rules.analysis;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ public class RuleCollisionAnalyserApplication {
 
         DslrFolderScanner folderScanner = new DslrFolderScanner();
         DslrRuleExtractor ruleExtractor = new DslrRuleExtractor();
+        RuleConditionExtractor conditionExtractor = new RuleConditionExtractor();
 
         List<Path> dslrFiles = folderScanner.findDslrFiles(options.dslrDirectory());
 
@@ -34,21 +37,27 @@ public class RuleCollisionAnalyserApplication {
         System.out.println("  " + allRules.size());
         System.out.println();
 
-        for (ParsedDslrRule rule : allRules) {
-            System.out.println("--------------------------------------------------");
-            System.out.println("Rule: " + rule.ruleName());
-            System.out.println("File: " + rule.sourceFile());
-            System.out.println("When lines: " + rule.whenLines().size());
-            System.out.println("Then lines: " + rule.thenLines().size());
+        List<RuleDefinition> ruleDefinitions = allRules.stream()
+                .map(conditionExtractor::extract)
+                .toList();
 
+        for (RuleDefinition definition : ruleDefinitions) {
+            System.out.println("==================================================");
+            System.out.println("RULE: " + definition.ruleName());
+            System.out.println("FILE: " + definition.sourceFile());
             System.out.println();
-            System.out.println("WHEN:");
-            rule.whenLines().forEach(line -> System.out.println("  " + line));
 
-            System.out.println();
-            System.out.println("THEN:");
-            rule.thenLines().forEach(line -> System.out.println("  " + line));
-            System.out.println();
+            for (RuleCondition condition : definition.conditions()) {
+                System.out.println("Original line:");
+                System.out.println("  " + condition.originalLine());
+
+                System.out.println("Parsed:");
+                System.out.println("  fieldPath = " + condition.fieldPath());
+                System.out.println("  operator  = " + condition.operator());
+                System.out.println("  values    = " + condition.values());
+
+                System.out.println();
+            }
         }
     }
 }

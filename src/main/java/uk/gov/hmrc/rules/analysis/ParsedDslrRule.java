@@ -1,3 +1,5 @@
+package uk.gov.hmrc.rules.analysis;
+
 import java.util.List;
 
 public record ParsedDslrRule(

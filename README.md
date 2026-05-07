@@ -28,13 +28,13 @@ rule-collision-analyser
                     └── hmrc
                         └── rules
                             └── analysis
-                                ├── RuleCollisionAnalyserApplication.java
+                                ├── uk.gov.hmrc.rules.analysis.RuleCollisionAnalyserApplication.java
                                 ├── cli
-                                │   └── CommandLineOptions.java
+                                │   └── uk.gov.hmrc.rules.analysis.CommandLineOptions.java
                                 └── dslr
-                                    ├── DslrFolderScanner.java
-                                    ├── DslrRuleExtractor.java
-                                    └── ParsedDslrRule.java
+                                    ├── uk.gov.hmrc.rules.analysis.DslrFolderScanner.java
+                                    ├── uk.gov.hmrc.rules.analysis.DslrRuleExtractor.java
+                                    └── uk.gov.hmrc.rules.analysis.ParsedDslrRule.java
 ```
 java -jar rule-collision-analyser-1.0.0.jar \
 --dslr-dir /path/to/your/dslr/folder
