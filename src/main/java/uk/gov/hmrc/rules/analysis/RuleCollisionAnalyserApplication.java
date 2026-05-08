@@ -1,5 +1,12 @@
 package uk.gov.hmrc.rules.analysis;
 
+import uk.gov.hmrc.rules.analysis.xml.BaseXmlPayloadLoader;
+import uk.gov.hmrc.rules.analysis.xml.GeneratedPayloadWriter;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +20,21 @@ public class RuleCollisionAnalyserApplication {
         DslrRuleExtractor ruleExtractor = new DslrRuleExtractor();
         RuleConditionExtractor conditionExtractor = new RuleConditionExtractor();
 
+        BaseXmlPayloadLoader baseXmlPayloadLoader = new BaseXmlPayloadLoader();
+        GeneratedPayloadWriter generatedPayloadWriter = new GeneratedPayloadWriter();
+
         List<Path> dslrFiles = folderScanner.findDslrFiles(options.dslrDirectory());
 
         System.out.println("DSLR directory:");
         System.out.println("  " + options.dslrDirectory());
+        System.out.println();
+
+        System.out.println("Base XML payload:");
+        System.out.println("  " + options.basePayload());
+        System.out.println();
+
+        System.out.println("Output directory:");
+        System.out.println("  " + options.outputDirectory());
         System.out.println();
 
         System.out.println("DSLR files found:");
@@ -41,23 +59,19 @@ public class RuleCollisionAnalyserApplication {
                 .map(conditionExtractor::extract)
                 .toList();
 
-        for (RuleDefinition definition : ruleDefinitions) {
-            System.out.println("==================================================");
-            System.out.println("RULE: " + definition.ruleName());
-            System.out.println("FILE: " + definition.sourceFile());
-            System.out.println();
+        String baseXml = baseXmlPayloadLoader.load(options.basePayload());
 
-            for (RuleCondition condition : definition.conditions()) {
-                System.out.println("Original line:");
-                System.out.println("  " + condition.originalLine());
-
-                System.out.println("Parsed:");
-                System.out.println("  fieldPath = " + condition.fieldPath());
-                System.out.println("  operator  = " + condition.operator());
-                System.out.println("  values    = " + condition.values());
-
-                System.out.println();
-            }
+        for (RuleDefinition ruleDefinition : ruleDefinitions) {
+            generatedPayloadWriter.write(
+                    options.outputDirectory(),
+                    ruleDefinition.ruleName(),
+                    baseXml
+            );
         }
+
+        System.out.println();
+        System.out.println("Done.");
+        System.out.println("Payloads generated:");
+        System.out.println("  " + ruleDefinitions.size());
     }
 }

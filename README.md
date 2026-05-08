@@ -44,3 +44,8 @@ java -jar target/rule-collision-analyser-1.0.0.jar \
 
 java -jar target/rule-collision-analyser-1.0.0.jar \
 --dslr-dir src/main/resources/rules/br455
+
+java -jar target/rule-collision-analyser-1.0.0.jar \
+--dslr-dir src/main/resources/rules/test \
+--base-payload src/main/resources/xml/base-valid-payload.xml \
+--output-dir target/generated-payloads
