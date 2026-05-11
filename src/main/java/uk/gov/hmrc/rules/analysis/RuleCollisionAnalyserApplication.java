@@ -1,7 +1,6 @@
 package uk.gov.hmrc.rules.analysis;
 
-import uk.gov.hmrc.rules.analysis.xml.BaseXmlPayloadLoader;
-import uk.gov.hmrc.rules.analysis.xml.GeneratedPayloadWriter;
+import uk.gov.hmrc.rules.analysis.xml.*;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -61,17 +60,30 @@ public class RuleCollisionAnalyserApplication {
 
         String baseXml = baseXmlPayloadLoader.load(options.basePayload());
 
+        XmlPayloadUpdater xmlPayloadUpdater =
+                new XmlPayloadUpdater(new XmlFieldMappingRegistry());
+
+        UnmappedConditionReportWriter unmappedConditionReportWriter =
+                new UnmappedConditionReportWriter();
+
+        List<UnmappedCondition> allUnmappedConditions = new ArrayList<>();
+
         for (RuleDefinition ruleDefinition : ruleDefinitions) {
+            XmlUpdateResult updateResult =
+                    xmlPayloadUpdater.updatePayload(baseXml, ruleDefinition);
+
             generatedPayloadWriter.write(
                     options.outputDirectory(),
-                    ruleDefinition.ruleName(),
-                    baseXml
+                    updateResult.ruleName(),
+                    updateResult.xml()
             );
+
+            allUnmappedConditions.addAll(updateResult.unmappedConditions());
         }
 
-        System.out.println();
-        System.out.println("Done.");
-        System.out.println("Payloads generated:");
-        System.out.println("  " + ruleDefinitions.size());
+        unmappedConditionReportWriter.write(
+                options.outputDirectory(),
+                allUnmappedConditions
+        );
     }
 }
