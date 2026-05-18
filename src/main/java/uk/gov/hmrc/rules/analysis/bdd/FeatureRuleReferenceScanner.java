@@ -38,26 +38,31 @@ public class FeatureRuleReferenceScanner {
             Path featureFile,
             Set<BddRuleReference> references
     ) {
+        scanText(featureFile.getFileName().toString(), featureFile, references);
+
         try {
             String content = Files.readString(featureFile);
-
-            Matcher matcher = RULE_PATTERN.matcher(content);
-
-            while (matcher.find()) {
-
-                references.add(
-                        new BddRuleReference(
-                                matcher.group(),
-                                featureFile
-                        )
-                );
-            }
-
+            scanText(content, featureFile, references);
         } catch (IOException exception) {
             throw new IllegalStateException(
                     "Failed to scan feature file: " + featureFile,
                     exception
             );
+        }
+    }
+
+    private void scanText(
+            String text,
+            Path featureFile,
+            Set<BddRuleReference> references
+    ) {
+        Matcher matcher = RULE_PATTERN.matcher(text);
+
+        while (matcher.find()) {
+            references.add(new BddRuleReference(
+                    matcher.group(),
+                    featureFile
+            ));
         }
     }
 }
