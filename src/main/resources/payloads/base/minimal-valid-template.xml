@@ -1,0 +1,13 @@
+<DeclarationValidationRequest>
+    <referenceDate>2026-05-11T00:00:00</referenceDate>
+    <declaration>
+        <versionNumber>1</versionNumber>
+        <creationDate>2026-05-11T00:00:00</creationDate>
+        <reference>LOCAL-TEST-DECLARATION</reference>
+        <acceptanceDate>2026-05-11T00:00:00</acceptanceDate>
+        <type>A</type>
+        <procedureCategory>H1</procedureCategory>
+    </declaration>
+    <externalPartyID>LOCAL_TEST</externalPartyID>
+    <topic>DECLARATION_VALIDATION</topic>
+</DeclarationValidationRequest>

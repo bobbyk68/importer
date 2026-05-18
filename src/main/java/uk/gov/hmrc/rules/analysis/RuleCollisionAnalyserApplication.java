@@ -1,5 +1,6 @@
 package uk.gov.hmrc.rules.analysis;
 
+import uk.gov.hmrc.rules.analysis.report.RuleSetSummaryPrinter;
 import uk.gov.hmrc.rules.analysis.xml.*;
 
 import java.nio.file.Path;
@@ -53,6 +54,11 @@ public class RuleCollisionAnalyserApplication {
         System.out.println("Total rules extracted:");
         System.out.println("  " + allRules.size());
         System.out.println();
+
+        RuleSetSummaryPrinter ruleSetSummaryPrinter =
+                new RuleSetSummaryPrinter();
+
+        ruleSetSummaryPrinter.print(allRules);
 
         List<RuleDefinition> ruleDefinitions = allRules.stream()
                 .map(conditionExtractor::extract)
