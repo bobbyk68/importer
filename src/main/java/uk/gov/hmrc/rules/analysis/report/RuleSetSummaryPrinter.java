@@ -1,8 +1,7 @@
 package uk.gov.hmrc.rules.analysis.report;
 
-import uk.gov.hmrc.rules.analysis.ParsedDslrRule;
+import uk.gov.hmrc.rules.analysis.dslr.ParsedDslrRule;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package uk.gov.hmrc.rules.analysis;
+package uk.gov.hmrc.rules.analysis.dslr;
 
 import java.util.List;
 

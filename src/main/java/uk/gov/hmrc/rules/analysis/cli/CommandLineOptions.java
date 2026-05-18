@@ -1,4 +1,4 @@
-package uk.gov.hmrc.rules.analysis;
+package uk.gov.hmrc.rules.analysis.cli;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -6,16 +6,16 @@ import java.nio.file.Path;
 public class CommandLineOptions {
 
     private final Path dslrDirectory;
-    private final Path basePayload;
+    private final Path bddDirectory;
     private final Path outputDirectory;
 
     private CommandLineOptions(
             Path dslrDirectory,
-            Path basePayload,
+            Path bddDirectory,
             Path outputDirectory
     ) {
         this.dslrDirectory = dslrDirectory;
-        this.basePayload = basePayload;
+        this.bddDirectory = bddDirectory;
         this.outputDirectory = outputDirectory;
     }
 
@@ -31,7 +31,7 @@ public class CommandLineOptions {
         }
 
         Path dslrDirectory = null;
-        Path basePayload = null;
+        Path bddDirectory = null;
         Path outputDirectory = null;
 
         for (int index = 0; index < args.length; index += 2) {
@@ -42,8 +42,8 @@ public class CommandLineOptions {
                 case "--dslr-dir" ->
                         dslrDirectory = Path.of(optionValue).toAbsolutePath().normalize();
 
-                case "--base-payload" ->
-                        basePayload = Path.of(optionValue).toAbsolutePath().normalize();
+                case "--bdd-dir" ->
+                        bddDirectory = Path.of(optionValue).toAbsolutePath().normalize();
 
                 case "--output-dir" ->
                         outputDirectory = Path.of(optionValue).toAbsolutePath().normalize();
@@ -54,21 +54,21 @@ public class CommandLineOptions {
         }
 
         validateDirectory("DSLR directory", dslrDirectory);
-        validateFile("Base payload", basePayload);
+        validateFile("Base payload", bddDirectory);
 
         if (outputDirectory == null) {
             throw new IllegalArgumentException("Missing --output-dir");
         }
 
-        return new CommandLineOptions(dslrDirectory, basePayload, outputDirectory);
+        return new CommandLineOptions(dslrDirectory, bddDirectory, outputDirectory);
     }
 
     public Path dslrDirectory() {
         return dslrDirectory;
     }
 
-    public Path basePayload() {
-        return basePayload;
+    public Path bddDirectory() {
+        return bddDirectory;
     }
 
     public Path outputDirectory() {

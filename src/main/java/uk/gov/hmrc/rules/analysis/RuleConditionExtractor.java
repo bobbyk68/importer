@@ -1,5 +1,8 @@
 package uk.gov.hmrc.rules.analysis;
 
+import uk.gov.hmrc.rules.analysis.dslr.ParsedDslrRule;
+import uk.gov.hmrc.rules.analysis.dslr.RuleDefinition;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -101,5 +104,4 @@ public class RuleConditionExtractor {
                 .replace(" type code", ".typeCode")
                 .replace(" code", ".code")
                 .replace(' ', '.');
-    }
-}
+    }}

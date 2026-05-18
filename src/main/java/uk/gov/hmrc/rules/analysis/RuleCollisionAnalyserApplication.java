@@ -1,15 +1,21 @@
 package uk.gov.hmrc.rules.analysis;
 
+import uk.gov.hmrc.rules.analysis.bdd.BddRuleReference;
+import uk.gov.hmrc.rules.analysis.bdd.FeatureRuleReferenceScanner;
+import uk.gov.hmrc.rules.analysis.cli.CommandLineOptions;
+import uk.gov.hmrc.rules.analysis.dslr.DslrFolderScanner;
+import uk.gov.hmrc.rules.analysis.dslr.DslrRuleExtractor;
+import uk.gov.hmrc.rules.analysis.dslr.ParsedDslrRule;
+import uk.gov.hmrc.rules.analysis.report.RuleCoverageReportWriter;
+import uk.gov.hmrc.rules.analysis.report.RuleCoverageResult;
 import uk.gov.hmrc.rules.analysis.report.RuleSetSummaryPrinter;
-import uk.gov.hmrc.rules.analysis.xml.*;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RuleCollisionAnalyserApplication {
 
@@ -18,10 +24,6 @@ public class RuleCollisionAnalyserApplication {
 
         DslrFolderScanner folderScanner = new DslrFolderScanner();
         DslrRuleExtractor ruleExtractor = new DslrRuleExtractor();
-        RuleConditionExtractor conditionExtractor = new RuleConditionExtractor();
-
-        BaseXmlPayloadLoader baseXmlPayloadLoader = new BaseXmlPayloadLoader();
-        GeneratedPayloadWriter generatedPayloadWriter = new GeneratedPayloadWriter();
 
         List<Path> dslrFiles = folderScanner.findDslrFiles(options.dslrDirectory());
 
@@ -30,7 +32,7 @@ public class RuleCollisionAnalyserApplication {
         System.out.println();
 
         System.out.println("Base XML payload:");
-        System.out.println("  " + options.basePayload());
+        System.out.println("  " + options.bddDirectory());
         System.out.println();
 
         System.out.println("Output directory:");
@@ -60,36 +62,44 @@ public class RuleCollisionAnalyserApplication {
 
         ruleSetSummaryPrinter.print(allRules);
 
-        List<RuleDefinition> ruleDefinitions = allRules.stream()
-                .map(conditionExtractor::extract)
-                .toList();
+        FeatureRuleReferenceScanner featureScanner =
+                new FeatureRuleReferenceScanner();
 
-        String baseXml = baseXmlPayloadLoader.load(options.basePayload());
+        Set<BddRuleReference> bddReferences =
+                featureScanner.scan(options.bddDirectory());
 
-        XmlPayloadUpdater xmlPayloadUpdater =
-                new XmlPayloadUpdater(new XmlFieldMappingRegistry());
+        Map<String, List<String>> referencesByRuleName =
+                bddReferences.stream()
+                        .collect(Collectors.groupingBy(
+                                BddRuleReference::ruleName,
+                                Collectors.mapping(
+                                        reference -> reference.sourceFile().toString(),
+                                        Collectors.toList()
+                                )
+                        ));
 
-        UnmappedConditionReportWriter unmappedConditionReportWriter =
-                new UnmappedConditionReportWriter();
+        List<RuleCoverageResult> coverageResults =
+                allRules.stream()
+                        .map(rule -> {
+                            List<String> references =
+                                    referencesByRuleName.getOrDefault(
+                                            rule.ruleName(),
+                                            List.of()
+                                    );
 
-        List<UnmappedCondition> allUnmappedConditions = new ArrayList<>();
+                            return new RuleCoverageResult(
+                                    rule.ruleName(),
+                                    rule.sourceFile(),
+                                    !references.isEmpty(),
+                                    references
+                            );
+                        })
+                        .toList();
 
-        for (RuleDefinition ruleDefinition : ruleDefinitions) {
-            XmlUpdateResult updateResult =
-                    xmlPayloadUpdater.updatePayload(baseXml, ruleDefinition);
-
-            generatedPayloadWriter.write(
-                    options.outputDirectory(),
-                    updateResult.ruleName(),
-                    updateResult.xml()
-            );
-
-            allUnmappedConditions.addAll(updateResult.unmappedConditions());
-        }
-
-        unmappedConditionReportWriter.write(
+        new RuleCoverageReportWriter().write(
                 options.outputDirectory(),
-                allUnmappedConditions
+                coverageResults
         );
+
     }
 }
