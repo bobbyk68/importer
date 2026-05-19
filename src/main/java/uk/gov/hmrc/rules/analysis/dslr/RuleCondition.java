@@ -1,4 +1,6 @@
-package uk.gov.hmrc.rules.analysis;
+package uk.gov.hmrc.rules.analysis.dslr;
+
+import uk.gov.hmrc.rules.analysis.ConditionOperator;
 
 import java.util.Set;
 
