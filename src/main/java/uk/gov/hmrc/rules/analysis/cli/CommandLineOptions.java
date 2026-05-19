@@ -54,7 +54,7 @@ public class CommandLineOptions {
         }
 
         validateDirectory("DSLR directory", dslrDirectory);
-        validateFile("Base payload", bddDirectory);
+        validateDirectory("bdd directory", bddDirectory);
 
         if (outputDirectory == null) {
             throw new IllegalArgumentException("Missing --output-dir");

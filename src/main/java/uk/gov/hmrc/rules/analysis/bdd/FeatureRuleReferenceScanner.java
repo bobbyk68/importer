@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -17,6 +19,10 @@ public class FeatureRuleReferenceScanner {
             Pattern.compile(
                     "(?<![A-Za-z0-9_])BR\\d{3}_\\d{3}(?:_[A-Za-z0-9_]+)?(?![A-Za-z0-9_])"
             );
+    private List<Path> cachedFeatureFiles;
+
+    private final Map<Path, String> contentCache = new HashMap<>();
+
 
     private final List<InvalidFeatureReference> invalidReferences =
             new ArrayList<>();
@@ -25,92 +31,55 @@ public class FeatureRuleReferenceScanner {
             ParsedDslrRule rule,
             Path featureDirectory
     ) {
-
         String fullRuleName = rule.ruleName();
-
         String baseRuleKey = baseRuleKey(fullRuleName);
 
         List<String> matchingFeatureFiles = new ArrayList<>();
 
-        try (Stream<Path> paths = Files.walk(featureDirectory)) {
+        List<Path> featureFiles = featureFiles(featureDirectory);
 
-            List<Path> featureFiles = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".feature"))
-                    .toList();
+        for (Path featureFile : featureFiles) {
+            String featureFilePath = featureFile.toString();
 
-            /*
-             * STEP 1
-             * Search feature filenames first using base rule key
-             */
-            for (Path featureFile : featureFiles) {
+            if (featureFilePath.contains(baseRuleKey)
+                    || featureFilePath.contains(fullRuleName)) {
 
-                String featureFileName =
-                        featureFile.getFileName().toString();
+                matchingFeatureFiles.add(featureFile.toString());
 
-                if (featureFileName.contains(baseRuleKey)) {
+                validateFeatureContents(featureFile, baseRuleKey);
 
-                    matchingFeatureFiles.add(featureFile.toString());
-
-                    validateFeatureContents(
-                            featureFile,
-                            baseRuleKey
-                    );
-
-                    return new RuleCoverageResult(
-                            fullRuleName,
-                            rule.sourceFile(),
-                            true,
-                            matchingFeatureFiles
-                    );
-                }
+                return new RuleCoverageResult(
+                        fullRuleName,
+                        rule.sourceFile(),
+                        true,
+                        matchingFeatureFiles
+                );
             }
-
-            /*
-             * STEP 2
-             * Fallback:
-             * search feature contents using FULL rule name
-             */
-            for (Path featureFile : featureFiles) {
-
-                String content = Files.readString(featureFile);
-
-                if (content.contains(fullRuleName)) {
-
-                    matchingFeatureFiles.add(featureFile.toString());
-
-                    validateFeatureContents(
-                            featureFile,
-                            baseRuleKey
-                    );
-
-                    return new RuleCoverageResult(
-                            fullRuleName,
-                            rule.sourceFile(),
-                            true,
-                            matchingFeatureFiles
-                    );
-                }
-            }
-
-            /*
-             * STEP 3
-             * No coverage found
-             */
-            return new RuleCoverageResult(
-                    fullRuleName,
-                    rule.sourceFile(),
-                    false,
-                    List.of()
-            );
-
-        } catch (IOException exception) {
-
-            throw new IllegalStateException(
-                    "Failed during feature coverage scan",
-                    exception
-            );
         }
+
+        for (Path featureFile : featureFiles) {
+            String content = readFeatureContent(featureFile);
+
+            if (content.contains(fullRuleName)) {
+                matchingFeatureFiles.add(featureFile.toString());
+
+                validateFeatureContents(featureFile, baseRuleKey);
+
+                return new RuleCoverageResult(
+                        fullRuleName,
+                        rule.sourceFile(),
+                        true,
+                        matchingFeatureFiles
+                );
+            }
+        }
+
+        return new RuleCoverageResult(
+                fullRuleName,
+                rule.sourceFile(),
+                false,
+                List.of()
+        );
     }
 
     private void validateFeatureContents(
@@ -167,5 +136,43 @@ public class FeatureRuleReferenceScanner {
 
     public List<InvalidFeatureReference> invalidReferences() {
         return invalidReferences;
+    }
+
+    private String readFeatureContent(Path featureFile) {
+        return contentCache.computeIfAbsent(featureFile, path -> {
+            try {
+                return Files.readString(path);
+            } catch (IOException exception) {
+                throw new IllegalStateException(
+                        "Failed to read feature file: " + path,
+                        exception
+                );
+            }
+        });
+    }
+
+    private List<Path> featureFiles(Path featureDirectory) {
+        if (cachedFeatureFiles != null) {
+            return cachedFeatureFiles;
+        }
+
+        try (Stream<Path> paths = Files.walk(featureDirectory)) {
+            cachedFeatureFiles = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".feature"))
+                    .toList();
+
+            System.out.println("Feature files found:");
+            System.out.println("  " + cachedFeatureFiles.size());
+            System.out.println();
+
+            return cachedFeatureFiles;
+
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Failed to scan feature directory: " + featureDirectory,
+                    exception
+            );
+        }
     }
 }
