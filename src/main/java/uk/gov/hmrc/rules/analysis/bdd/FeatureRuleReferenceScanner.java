@@ -45,15 +45,19 @@ public class FeatureRuleReferenceScanner {
                     || featureFilePath.contains(fullRuleName)) {
 
                 matchingFeatureFiles.add(featureFile.toString());
-
-                validateFeatureContents(featureFile, baseRuleKey);
-
-                return new RuleCoverageResult(
-                        fullRuleName,
-                        rule.sourceFile(),
-                        true,
-                        matchingFeatureFiles
+                return coveredResult(
+                        rule,
+                        baseRuleKey,
+                        featureFile
                 );
+//                validateFeatureContents(featureFile, baseRuleKey);
+//
+//                return new RuleCoverageResult(
+//                        fullRuleName,
+//                        rule.sourceFile(),
+//                        true,
+//                        matchingFeatureFiles
+//                );
             }
         }
 
@@ -63,13 +67,10 @@ public class FeatureRuleReferenceScanner {
             if (content.contains(fullRuleName)) {
                 matchingFeatureFiles.add(featureFile.toString());
 
-                validateFeatureContents(featureFile, baseRuleKey);
-
-                return new RuleCoverageResult(
-                        fullRuleName,
-                        rule.sourceFile(),
-                        true,
-                        matchingFeatureFiles
+                return coveredResult(
+                        rule,
+                        baseRuleKey,
+                        featureFile
                 );
             }
         }
@@ -79,6 +80,25 @@ public class FeatureRuleReferenceScanner {
                 rule.sourceFile(),
                 false,
                 List.of()
+        );
+    }
+
+    private RuleCoverageResult coveredResult(
+            ParsedDslrRule rule,
+            String baseRuleKey,
+            Path featureFile
+    ) {
+
+        validateFeatureContents(
+                featureFile,
+                baseRuleKey
+        );
+
+        return new RuleCoverageResult(
+                rule.ruleName(),
+                rule.sourceFile(),
+                true,
+                List.of(featureFile.toString())
         );
     }
 
